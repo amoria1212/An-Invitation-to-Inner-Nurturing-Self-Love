@@ -49,12 +49,60 @@
             border-radius: 0.375rem;
             resize: vertical;
         }
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .save-indicator.show {
+            opacity: 1;
+        }
+        .save-indicator.saved {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .save-indicator.saving {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .journal-box { background: #f9f9f9; border-left: 2px solid #ccc; }
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
+    <!-- Save Indicator -->
+    <div id="saveIndicator" class="save-indicator">
+        <span id="saveText">Auto-saving...</span>
+    </div>
+
     <!-- Main Container -->
     <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-100">
+
+        <!-- Save/Export Controls -->
+        <div class="no-print mb-6 flex flex-wrap gap-3 justify-end">
+            <button onclick="exportData()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                📥 Export My Responses
+            </button>
+            <button onclick="clearData()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium">
+                🗑️ Clear All Data
+            </button>
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+                🖨️ Print
+            </button>
+        </div>
 
         <!-- Introductory Header with Logo on Top -->
         <header class="flex flex-col items-center mb-6 text-center">
@@ -64,7 +112,7 @@
             <div class="flex-grow">
                 <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">An Invitation to Nurturing & Self-Love</h1>
                 <p class="text-gray-600 leading-relaxed text-lg">
-                    This is an invitation to gently explore your inner world and practice new ways of offering yourself care and compassion between our sessions. There is no pressure to complete everything or follow a specific timeline—the goal is simply to be curious about your own heart and build a warmer, more loving relationship with yourself.
+                    This is an invitation to gently explore your inner world and practice new ways of offering yourself care and compassion between our sessions. Your responses are automatically saved as you type.
                 </p>
             </div>
         </header>
@@ -79,13 +127,13 @@
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Simple Awareness Practice</h4>
                 <p class="mb-1 text-sm font-semibold">When you notice emotional intensity, pause and ask yourself:</p>
                 <p class="mb-1 text-sm italic">What is happening in my body right now?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="body_awareness"></textarea>
                 <p class="mb-1 text-sm italic">What thoughts are running through my mind?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="thoughts_awareness"></textarea>
                 <p class="mb-1 text-sm italic">What emotions am I experiencing?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="emotions_awareness"></textarea>
                 <p class="mb-1 text-sm italic">What was happening just before this feeling arose?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="trigger_awareness"></textarea>
             </div>
         </div>
 
@@ -100,37 +148,37 @@
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Nurturing & Comfort</h4>
                 <p class="mb-1 text-sm font-semibold">Which of these resonate with you most?</p>
                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-3">
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Touch: Wrap yourself in a soft blanket or give yourself a hug.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Warmth: Take a warm bath or sit in sunlight.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Comfort: Create a cozy space or curl up with a pet.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Nourishment: Prepare food with care or drink something soothing.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_touch"> Touch: Wrap yourself in a soft blanket or give yourself a hug.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_warmth"> Warmth: Take a warm bath or sit in sunlight.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_comfort"> Comfort: Create a cozy space or curl up with a pet.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_nourishment"> Nourishment: Prepare food with care or drink something soothing.</li>
                 </ul>
                 <p class="mb-1 text-sm font-semibold">Other nurturing activities you've discovered?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="nurture_other"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Emotional Safety</h4>
                 <p class="mb-1 text-sm font-semibold">Which of these help you feel safe?</p>
                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-3">
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Grounding: Feel your feet on the floor or hold a comforting object.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Breathing: Practice slow, deep breathing.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Environment: Dim harsh lights or reduce noise.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Self-talk: Remind yourself "I am safe right now."</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_grounding"> Grounding: Feel your feet on the floor or hold a comforting object.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_breathing"> Breathing: Practice slow, deep breathing.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_environment"> Environment: Dim harsh lights or reduce noise.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_selftalk"> Self-talk: Remind yourself "I am safe right now."</li>
                 </ul>
                 <p class="mb-1 text-sm font-semibold">Other ways you create safety for yourself?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="safety_other"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Inner Guidance</h4>
                 <p class="mb-1 text-sm font-semibold">Which of these help you connect with your inner wisdom?</p>
                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-3">
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Stillness: Meditate or practice mindful walking.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Writing: Journal your thoughts or dialogue with your wiser self.</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Reflection: Ask "What would be most loving for me right now?"</li>
-                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]"> Values: Connect with what matters most to you.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_stillness"> Stillness: Meditate or practice mindful walking.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_writing"> Writing: Journal your thoughts or dialogue with your wiser self.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_reflection"> Reflection: Ask "What would be most loving for me right now?"</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_values"> Values: Connect with what matters most to you.</li>
                 </ul>
                 <p class="mb-1 text-sm font-semibold">Other practices you use for inner guidance?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="guidance_other"></textarea>
             </div>
         </div>
 
@@ -144,23 +192,23 @@
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Surrogate Comfort Awareness</h4>
                 <p class="mb-1 text-sm font-semibold">What emotion or need preceded this impulse to use a familiar coping strategy (e.g., scrolling, food, etc.)?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="surrogate_emotion"></textarea>
                 <p class="mb-1 text-sm font-semibold">How does it feel to experiment with meeting your needs directly?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="surrogate_experiment"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Nervous System Exploration</h4>
                 <p class="mb-1 text-sm font-semibold">What helps you feel calm and regulated?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="nervous_calm"></textarea>
                 <p class="mb-1 text-sm font-semibold">When do you feel most safe and relaxed?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="nervous_safe"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Boundary Awareness</h4>
                 <p class="mb-1 text-sm font-semibold">When do you automatically say "yes" when you want to say "no"?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="boundary_yes"></textarea>
                 <p class="mb-1 text-sm font-semibold">How comfortable are you with taking space when you need it?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="boundary_space"></textarea>
             </div>
         </div>
         
@@ -173,16 +221,16 @@
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Working with Grief</h4>
                 <p class="mb-1 text-sm font-semibold">What sadness about past losses is emerging for you?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="grief_sadness"></textarea>
                 <p class="mb-1 text-sm font-semibold">What rituals can you create to honor what you didn't receive?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="grief_rituals"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Releasing Old Stories</h4>
                 <p class="mb-1 text-sm font-semibold">What outdated beliefs about yourself are you noticing?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="stories_outdated"></textarea>
                 <p class="mb-1 text-sm font-semibold">What new, kinder narrative can you experiment with?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="stories_kinder"></textarea>
             </div>
         </div>
 
@@ -195,16 +243,16 @@
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Relationship Assessment</h4>
                 <p class="mb-1 text-sm font-semibold">Which relationships feel emotionally safe and nourishing?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="relationship_safe"></textarea>
                 <p class="mb-1 text-sm font-semibold">Which connections consistently drain your energy?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="relationship_draining"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Communication Experiments</h4>
                 <p class="mb-1 text-sm font-semibold">What can you practice to ask for what you need more directly?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="communication_direct"></textarea>
                 <p class="mb-1 text-sm font-semibold">What does it feel like to share feelings without taking responsibility for others' reactions?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="communication_feelings"></textarea>
             </div>
         </div>
 
@@ -217,14 +265,14 @@
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Creative Expression</h4>
                 <p class="mb-1 text-sm font-semibold">What forms of creative expression feel most authentic for you?</p>
-                <textarea class="journal-input mb-3" rows="2"></textarea>
+                <textarea class="journal-input mb-3" rows="2" data-key="creative_authentic"></textarea>
                 <p class="mb-1 text-sm font-semibold">How can you use these to connect with your authentic self?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="creative_connect"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Future Visioning</h4>
                 <p class="mb-1 text-sm font-semibold">What does it look like to fully trust yourself?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="future_trust"></textarea>
             </div>
         </div>
         
@@ -237,17 +285,17 @@
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Internal Shifts</h4>
                 <p class="mb-1 text-sm font-semibold">What internal shifts or changes have you noticed this week?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="progress_internal"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Relational Changes</h4>
                 <p class="mb-1 text-sm font-semibold">How have your relationships or communication patterns changed?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="progress_relational"></textarea>
             </div>
             <div class="journal-box">
                 <h4 class="text-lg font-bold text-gray-700 mb-2">Life Changes</h4>
                 <p class="mb-1 text-sm font-semibold">What changes have you noticed in your daily life?</p>
-                <textarea class="journal-input" rows="2"></textarea>
+                <textarea class="journal-input" rows="2" data-key="progress_life"></textarea>
             </div>
         </div>
 
@@ -270,17 +318,17 @@
         </p>
         <div class="space-y-4">
             <p class="font-semibold">What patterns am I noticing in my emotional needs and responses?</p>
-            <textarea class="journal-input" rows="2"></textarea>
+            <textarea class="journal-input" rows="2" data-key="session_patterns"></textarea>
             <p class="font-semibold">Which self-care practices feel most natural and helpful?</p>
-            <textarea class="journal-input" rows="2"></textarea>
+            <textarea class="journal-input" rows="2" data-key="session_helpful"></textarea>
             <p class="font-semibold">What feels challenging or brings up resistance?</p>
-            <textarea class="journal-input" rows="2"></textarea>
+            <textarea class="journal-input" rows="2" data-key="session_challenging"></textarea>
             <p class="font-semibold">How is my relationship with myself changing?</p>
-            <textarea class="journal-input" rows="2"></textarea>
+            <textarea class="journal-input" rows="2" data-key="session_relationship"></textarea>
             <p class="font-semibold">What support do I need to continue this healing journey?</p>
-            <textarea class="journal-input" rows="2"></textarea>
+            <textarea class="journal-input" rows="2" data-key="session_support"></textarea>
             <p class="font-semibold">What am I most grateful for in my growth so far?</p>
-            <textarea class="journal-input" rows="2"></textarea>
+            <textarea class="journal-input" rows="2" data-key="session_gratitude"></textarea>
         </div>
 
         <!-- Closing Remarks -->
@@ -290,5 +338,164 @@
 
     </div>
 
-</body>
-</html>
+    <script>
+        // Auto-save functionality
+        let saveTimeout;
+        const saveIndicator = document.getElementById('saveIndicator');
+        const saveText = document.getElementById('saveText');
+
+        // Load saved data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+        });
+
+        // Save data when inputs change
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('textarea[data-key], input[data-key]')) {
+                showSaveIndicator('saving');
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveData(e.target);
+                    showSaveIndicator('saved');
+                    setTimeout(() => hideSaveIndicator(), 2000);
+                }, 500);
+            }
+        });
+
+        // Save checkbox changes immediately
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('input[type="checkbox"][data-key]')) {
+                saveData(e.target);
+                showSaveIndicator('saved');
+                setTimeout(() => hideSaveIndicator(), 1000);
+            }
+        });
+
+        function saveData(element) {
+            const key = element.getAttribute('data-key');
+            if (element.type === 'checkbox') {
+                localStorage.setItem(key, element.checked);
+            } else {
+                localStorage.setItem(key, element.value);
+            }
+        }
+
+        function loadSavedData() {
+            // Load textareas
+            document.querySelectorAll('textarea[data-key]').forEach(textarea => {
+                const key = textarea.getAttribute('data-key');
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    textarea.value = saved;
+                }
+            });
+
+            // Load checkboxes
+            document.querySelectorAll('input[type="checkbox"][data-key]').forEach(checkbox => {
+                const key = checkbox.getAttribute('data-key');
+                const saved = localStorage.getItem(key);
+                if (saved === 'true') {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        function showSaveIndicator(status) {
+            saveIndicator.className = `save-indicator show ${status}`;
+            if (status === 'saving') {
+                saveText.textContent = 'Auto-saving...';
+            } else if (status === 'saved') {
+                saveText.textContent = '✓ Saved';
+            }
+        }
+
+        function hideSaveIndicator() {
+            saveIndicator.classList.remove('show');
+        }
+
+        function exportData() {
+            const data = {};
+            const date = new Date().toLocaleDateString();
+            
+            // Collect all saved data
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                const saved = localStorage.getItem(key);
+                if (saved && saved.trim()) {
+                    if (element.type === 'checkbox') {
+                        data[key] = saved === 'true' ? 'Yes' : 'No';
+                    } else {
+                        data[key] = saved;
+                    }
+                }
+            });
+
+            // Create formatted text
+            let exportText = `My Self-Care Journey Responses - ${date}\n`;
+            exportText += '='.repeat(50) + '\n\n';
+
+            const sections = {
+                'Part 1: Gentle Self-Observation': ['body_awareness', 'thoughts_awareness', 'emotions_awareness', 'trigger_awareness'],
+                'Part 2: Self-Care Toolkit': ['nurture_touch', 'nurture_warmth', 'nurture_comfort', 'nurture_nourishment', 'nurture_other', 'safety_grounding', 'safety_breathing', 'safety_environment', 'safety_selftalk', 'safety_other', 'guidance_stillness', 'guidance_writing', 'guidance_reflection', 'guidance_values', 'guidance_other'],
+                'Part 3: Exploring Patterns': ['surrogate_emotion', 'surrogate_experiment', 'nervous_calm', 'nervous_safe', 'boundary_yes', 'boundary_space'],
+                'Part 4: Processing Emotions': ['grief_sadness', 'grief_rituals', 'stories_outdated', 'stories_kinder'],
+                'Part 5: Building Connections': ['relationship_safe', 'relationship_draining', 'communication_direct', 'communication_feelings'],
+                'Part 6: Integration': ['creative_authentic', 'creative_connect', 'future_trust'],
+                'Part 7: Progress Recognition': ['progress_internal', 'progress_relational', 'progress_life'],
+                'Session Reflections': ['session_patterns', 'session_helpful', 'session_challenging', 'session_relationship', 'session_support', 'session_gratitude']
+            };
+
+            Object.entries(sections).forEach(([sectionName, keys]) => {
+                let hasContent = false;
+                let sectionText = `\n${sectionName}\n${'-'.repeat(30)}\n`;
+                
+                keys.forEach(key => {
+                    if (data[key]) {
+                        hasContent = true;
+                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        sectionText += `\n${label}:\n${data[key]}\n`;
+                    }
+                });
+                
+                if (hasContent) {
+                    exportText += sectionText;
+                }
+            });
+
+            // Download as text file
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `self-care-journey-${date.replace(/\//g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showSaveIndicator('saved');
+            saveText.textContent = '✓ Exported';
+            setTimeout(() => hideSaveIndicator(), 2000);
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all your responses? This cannot be undone.')) {
+                // Clear localStorage
+                document.querySelectorAll('[data-key]').forEach(element => {
+                    const key = element.getAttribute('data-key');
+                    localStorage.removeItem(key);
+                    
+                    // Clear the form elements
+                    if (element.type === 'checkbox') {
+                        element.checked = false;
+                    } else {
+                        element.value = '';
+                    }
+                });
+                
+                showSaveIndicator('saved');
+                saveText.textContent = '✓ Cleared';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            }
+        }
+    </script>

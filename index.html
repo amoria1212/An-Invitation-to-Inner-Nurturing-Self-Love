@@ -74,6 +74,34 @@
             color: #92400e;
             border: 1px solid #fde68a;
         }
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .share-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .share-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
         @media print {
             .no-print { display: none !important; }
             body { background: white; }
@@ -88,11 +116,65 @@
         <span id="saveText">Auto-saving...</span>
     </div>
 
+    <!-- Share Modal -->
+    <div id="shareModal" class="share-modal">
+        <div class="share-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Share Your Journey</h3>
+                <button onclick="closeShareModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="text-gray-600 mb-4">Choose how you'd like to share your self-care journey responses:</p>
+            
+            <div class="space-y-3">
+                <button onclick="shareViaEmail()" class="w-full p-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-left flex items-center">
+                    <span class="text-xl mr-3">📧</span>
+                    <div>
+                        <div class="font-medium">Email</div>
+                        <div class="text-sm text-blue-500">Send via your email client</div>
+                    </div>
+                </button>
+                
+                <button onclick="copyToClipboard()" class="w-full p-3 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-left flex items-center">
+                    <span class="text-xl mr-3">📋</span>
+                    <div>
+                        <div class="font-medium">Copy to Clipboard</div>
+                        <div class="text-sm text-green-500">Copy text to paste anywhere</div>
+                    </div>
+                </button>
+                
+                <button onclick="shareViaWebShare()" class="w-full p-3 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors text-left flex items-center" id="webShareButton" style="display: none;">
+                    <span class="text-xl mr-3">🔗</span>
+                    <div>
+                        <div class="font-medium">Share</div>
+                        <div class="text-sm text-purple-500">Use device sharing options</div>
+                    </div>
+                </button>
+                
+                <button onclick="downloadForSharing()" class="w-full p-3 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors text-left flex items-center">
+                    <span class="text-xl mr-3">💾</span>
+                    <div>
+                        <div class="font-medium">Download File</div>
+                        <div class="text-sm text-orange-500">Save as text file to share</div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="mt-4 p-3 bg-yellow-50 rounded-lg">
+                <p class="text-sm text-yellow-700">
+                    <strong>Privacy Note:</strong> Your responses contain personal information. Please share thoughtfully and only with trusted individuals.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Container -->
     <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-100">
 
         <!-- Save/Export Controls -->
         <div class="no-print mb-6 flex flex-wrap gap-3 justify-end">
+            <button onclick="openShareModal()" class="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium">
+                🔗 Share
+            </button>
             <button onclick="exportData()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
                 📥 Export My Responses
             </button>
@@ -347,6 +429,10 @@
         // Load saved data on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadSavedData();
+            // Check if Web Share API is available
+            if (navigator.share) {
+                document.getElementById('webShareButton').style.display = 'block';
+            }
         });
 
         // Save data when inputs change
@@ -413,7 +499,23 @@
             saveIndicator.classList.remove('show');
         }
 
-        function exportData() {
+        // Share modal functions
+        function openShareModal() {
+            document.getElementById('shareModal').classList.add('show');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('shareModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeShareModal();
+            }
+        });
+
+        function getShareableText() {
             const data = {};
             const date = new Date().toLocaleDateString();
             
@@ -431,23 +533,23 @@
             });
 
             // Create formatted text
-            let exportText = `My Self-Care Journey Responses - ${date}\n`;
-            exportText += '='.repeat(50) + '\n\n';
+            let shareText = `My Self-Care Journey - ${date}\n`;
+            shareText += '='.repeat(40) + '\n\n';
 
             const sections = {
-                'Part 1: Gentle Self-Observation': ['body_awareness', 'thoughts_awareness', 'emotions_awareness', 'trigger_awareness'],
-                'Part 2: Self-Care Toolkit': ['nurture_touch', 'nurture_warmth', 'nurture_comfort', 'nurture_nourishment', 'nurture_other', 'safety_grounding', 'safety_breathing', 'safety_environment', 'safety_selftalk', 'safety_other', 'guidance_stillness', 'guidance_writing', 'guidance_reflection', 'guidance_values', 'guidance_other'],
-                'Part 3: Exploring Patterns': ['surrogate_emotion', 'surrogate_experiment', 'nervous_calm', 'nervous_safe', 'boundary_yes', 'boundary_space'],
-                'Part 4: Processing Emotions': ['grief_sadness', 'grief_rituals', 'stories_outdated', 'stories_kinder'],
-                'Part 5: Building Connections': ['relationship_safe', 'relationship_draining', 'communication_direct', 'communication_feelings'],
-                'Part 6: Integration': ['creative_authentic', 'creative_connect', 'future_trust'],
-                'Part 7: Progress Recognition': ['progress_internal', 'progress_relational', 'progress_life'],
+                'Self-Observation': ['body_awareness', 'thoughts_awareness', 'emotions_awareness', 'trigger_awareness'],
+                'Self-Care Practices': ['nurture_touch', 'nurture_warmth', 'nurture_comfort', 'nurture_nourishment', 'nurture_other', 'safety_grounding', 'safety_breathing', 'safety_environment', 'safety_selftalk', 'safety_other', 'guidance_stillness', 'guidance_writing', 'guidance_reflection', 'guidance_values', 'guidance_other'],
+                'Patterns & Growth': ['surrogate_emotion', 'surrogate_experiment', 'nervous_calm', 'nervous_safe', 'boundary_yes', 'boundary_space'],
+                'Emotional Processing': ['grief_sadness', 'grief_rituals', 'stories_outdated', 'stories_kinder'],
+                'Relationships': ['relationship_safe', 'relationship_draining', 'communication_direct', 'communication_feelings'],
+                'Creative & Future Vision': ['creative_authentic', 'creative_connect', 'future_trust'],
+                'Progress Recognition': ['progress_internal', 'progress_relational', 'progress_life'],
                 'Session Reflections': ['session_patterns', 'session_helpful', 'session_challenging', 'session_relationship', 'session_support', 'session_gratitude']
             };
 
             Object.entries(sections).forEach(([sectionName, keys]) => {
                 let hasContent = false;
-                let sectionText = `\n${sectionName}\n${'-'.repeat(30)}\n`;
+                let sectionText = `\n${sectionName}\n${'-'.repeat(25)}\n`;
                 
                 keys.forEach(key => {
                     if (data[key]) {
@@ -458,16 +560,107 @@
                 });
                 
                 if (hasContent) {
-                    exportText += sectionText;
+                    shareText += sectionText;
                 }
             });
 
-            // Download as text file
-            const blob = new Blob([exportText], { type: 'text/plain' });
+            return shareText;
+        }
+
+        function shareViaEmail() {
+            const shareText = getShareableText();
+            const subject = encodeURIComponent('My Self-Care Journey Responses');
+            const body = encodeURIComponent(shareText);
+            const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+            
+            window.location.href = mailtoLink;
+            closeShareModal();
+            
+            showSaveIndicator('saved');
+            saveText.textContent = '✓ Email opened';
+            setTimeout(() => hideSaveIndicator(), 2000);
+        }
+
+        async function copyToClipboard() {
+            const shareText = getShareableText();
+            
+            try {
+                await navigator.clipboard.writeText(shareText);
+                closeShareModal();
+                
+                showSaveIndicator('saved');
+                saveText.textContent = '✓ Copied to clipboard';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = shareText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                closeShareModal();
+                showSaveIndicator('saved');
+                saveText.textContent = '✓ Copied to clipboard';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            }
+        }
+
+        async function shareViaWebShare() {
+            if (navigator.share) {
+                const shareText = getShareableText();
+                
+                try {
+                    await navigator.share({
+                        title: 'My Self-Care Journey',
+                        text: shareText
+                    });
+                    
+                    closeShareModal();
+                    showSaveIndicator('saved');
+                    saveText.textContent = '✓ Shared';
+                    setTimeout(() => hideSaveIndicator(), 2000);
+                } catch (err) {
+                    console.log('Error sharing:', err);
+                    // If sharing was cancelled, just close modal
+                    if (err.name !== 'AbortError') {
+                        alert('Sharing failed. Please try another method.');
+                    }
+                    closeShareModal();
+                }
+            }
+        }
+
+        function downloadForSharing() {
+            const shareText = getShareableText();
+            const date = new Date().toLocaleDateString().replace(/\//g, '-');
+            
+            const blob = new Blob([shareText], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `self-care-journey-${date.replace(/\//g, '-')}.txt`;
+            a.download = `self-care-journey-${date}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            closeShareModal();
+            showSaveIndicator('saved');
+            saveText.textContent = '✓ Downloaded';
+            setTimeout(() => hideSaveIndicator(), 2000);
+        }
+
+        function exportData() {
+            const shareText = getShareableText();
+            const date = new Date().toLocaleDateString().replace(/\//g, '-');
+            
+            const blob = new Blob([shareText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `self-care-journey-export-${date}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Invitation to Nurturing & Self-Love</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            background-color: #f4f0ed;
+            color: #374151;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .section-header {
+            position: relative;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .section-header::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #D1D5DB;
+            border-radius: 9999px;
+        }
+        .journal-box {
+            background-color: #f0e8e6;
+            border-left: 4px solid #D1D5DB;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .journal-input {
+            width: 100%;
+            min-height: 3rem;
+            border: 1px solid #d1d5db;
+            background-color: #fff;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            resize: vertical;
+        }
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .save-indicator.show {
+            opacity: 1;
+        }
+        .save-indicator.saved {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .save-indicator.saving {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .save-indicator.error {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+        .save-indicator.success {
+            background-color: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .share-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .share-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .share-option {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        .share-option:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .share-option .icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            min-width: 2rem;
+        }
+        .share-option .content {
+            flex: 1;
+        }
+        .share-option .title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .share-option .description {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .journal-box { background: #f9f9f9; border-left: 2px solid #ccc; }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <!-- Save Indicator -->
+    <div id="saveIndicator" class="save-indicator">
+        <span id="saveText">Auto-saving...</span>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="share-modal">
+        <div class="share-modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Share Your Journey</h3>
+                <button onclick="closeShareModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <p class="text-gray-600 mb-4">Choose how you'd like to share your self-care journey responses:</p>
+            
+            <div class="space-y-3">
+                <button onclick="shareViaEmail()" class="share-option" style="background-color: #EFF6FF; color: #1D4ED8;">
+                    <span class="icon">📧</span>
+                    <div class="content">
+                        <div class="title">Email</div>
+                        <div class="description">Send via your email client</div>
+                    </div>
+                </button>
+                
+                <button onclick="copyToClipboard()" class="share-option" style="background-color: #F0FDF4; color: #15803D;">
+                    <span class="icon">📋</span>
+                    <div class="content">
+                        <div class="title">Copy to Clipboard</div>
+                        <div class="description">Copy text to paste anywhere</div>
+                    </div>
+                </button>
+                
+                <button onclick="shareViaWebAPI()" class="share-option" id="webShareButton" style="background-color: #FAF5FF; color: #7C3AED; display: none;">
+                    <span class="icon">🔗</span>
+                    <div class="content">
+                        <div class="title">Share</div>
+                        <div class="description">Use device sharing options</div>
+                    </div>
+                </button>
+                
+                <button onclick="downloadFile()" class="share-option" style="background-color: #FFF7ED; color: #C2410C;">
+                    <span class="icon">💾</span>
+                    <div class="content">
+                        <div class="title">Download File</div>
+                        <div class="description">Save as text file to share</div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="mt-4 p-3 bg-yellow-50 rounded-lg">
+                <p class="text-sm text-yellow-700">
+                    <strong>Privacy Note:</strong> Your responses contain personal information. Please share thoughtfully and only with trusted individuals.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-gray-100">
+
+        <!-- Save/Export Controls -->
+        <div class="no-print mb-6 flex flex-wrap gap-3 justify-end">
+            <button onclick="openShareModal()" class="px-4 py-2 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium">
+                🔗 Share
+            </button>
+            <button onclick="exportData()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                📥 Export My Responses
+            </button>
+            <button onclick="clearData()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium">
+                🗑️ Clear All Data
+            </button>
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+                🖨️ Print
+            </button>
+        </div>
+
+        <!-- Introductory Header with Logo on Top -->
+        <header class="flex flex-col items-center mb-6 text-center">
+            <div class="mb-4">
+                <img src="https://i.imgur.com/JwAdvDd.png" alt="Janice LaFountaine, MS, LMFT Logo" class="h-24 w-auto rounded-full">
+            </div>
+            <div class="flex-grow">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">An Invitation to Nurturing & Self-Love</h1>
+                <p class="text-gray-600 leading-relaxed text-lg">
+                    This is an invitation to gently explore your inner world and practice new ways of offering yourself care and compassion between our sessions. Your responses are automatically saved as you type.
+                </p>
+            </div>
+        </header>
+
+        <!-- Part 1: Gentle Self-Observation -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-8 mb-4 section-header">Part 1: Gentle Self-Observation</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            Your first step is simply becoming a gentle, curious observer of your inner world. Between our sessions, you might notice moments when you feel an inner ache, loneliness, restlessness, or a sudden urge to use familiar coping behaviors. These are often signals of unmet emotional needs.
+        </p>
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Simple Awareness Practice</h4>
+                <p class="mb-1 text-sm font-semibold">When you notice emotional intensity, pause and ask yourself:</p>
+                <p class="mb-1 text-sm italic">What is happening in my body right now?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="body_awareness"></textarea>
+                <p class="mb-1 text-sm italic">What thoughts are running through my mind?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="thoughts_awareness"></textarea>
+                <p class="mb-1 text-sm italic">What emotions am I experiencing?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="emotions_awareness"></textarea>
+                <p class="mb-1 text-sm italic">What was happening just before this feeling arose?</p>
+                <textarea class="journal-input" rows="2" data-key="trigger_awareness"></textarea>
+            </div>
+        </div>
+
+        <!-- Part 2: Building Your Self-Care Toolkit -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Part 2: Building Your Self-Care Toolkit</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            When you recognize an emotional need, here are ways to offer yourself what you need using your five senses to create comfort and safety.
+        </p>
+
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Nurturing & Comfort</h4>
+                <p class="mb-1 text-sm font-semibold">Which of these resonate with you most?</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-2 mb-3">
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_touch"> Touch: Wrap yourself in a soft blanket or give yourself a hug.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_warmth"> Warmth: Take a warm bath or sit in sunlight.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_comfort"> Comfort: Create a cozy space or curl up with a pet.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="nurture_nourishment"> Nourishment: Prepare food with care or drink something soothing.</li>
+                </ul>
+                <p class="mb-1 text-sm font-semibold">Other nurturing activities you've discovered?</p>
+                <textarea class="journal-input" rows="2" data-key="nurture_other"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Emotional Safety</h4>
+                <p class="mb-1 text-sm font-semibold">Which of these help you feel safe?</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-2 mb-3">
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_grounding"> Grounding: Feel your feet on the floor or hold a comforting object.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_breathing"> Breathing: Practice slow, deep breathing.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_environment"> Environment: Dim harsh lights or reduce noise.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="safety_selftalk"> Self-talk: Remind yourself "I am safe right now."</li>
+                </ul>
+                <p class="mb-1 text-sm font-semibold">Other ways you create safety for yourself?</p>
+                <textarea class="journal-input" rows="2" data-key="safety_other"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Inner Guidance</h4>
+                <p class="mb-1 text-sm font-semibold">Which of these help you connect with your inner wisdom?</p>
+                <ul class="list-disc list-inside text-gray-700 space-y-2 mb-3">
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_stillness"> Stillness: Meditate or practice mindful walking.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_writing"> Writing: Journal your thoughts or dialogue with your wiser self.</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_reflection"> Reflection: Ask "What would be most loving for me right now?"</li>
+                    <li><input type="checkbox" class="mr-2 accent-[#D1D5DB]" data-key="guidance_values"> Values: Connect with what matters most to you.</li>
+                </ul>
+                <p class="mb-1 text-sm font-semibold">Other practices you use for inner guidance?</p>
+                <textarea class="journal-input" rows="2" data-key="guidance_other"></textarea>
+            </div>
+        </div>
+
+        <!-- Part 3: Exploring Your Patterns -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Part 3: Exploring Your Patterns</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            As you practice these awareness and self-care skills, you might begin to notice patterns. Consider exploring these areas at your own pace.
+        </p>
+
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Surrogate Comfort Awareness</h4>
+                <p class="mb-1 text-sm font-semibold">What emotion or need preceded this impulse to use a familiar coping strategy (e.g., scrolling, food, etc.)?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="surrogate_emotion"></textarea>
+                <p class="mb-1 text-sm font-semibold">How does it feel to experiment with meeting your needs directly?</p>
+                <textarea class="journal-input" rows="2" data-key="surrogate_experiment"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Nervous System Exploration</h4>
+                <p class="mb-1 text-sm font-semibold">What helps you feel calm and regulated?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="nervous_calm"></textarea>
+                <p class="mb-1 text-sm font-semibold">When do you feel most safe and relaxed?</p>
+                <textarea class="journal-input" rows="2" data-key="nervous_safe"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Boundary Awareness</h4>
+                <p class="mb-1 text-sm font-semibold">When do you automatically say "yes" when you want to say "no"?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="boundary_yes"></textarea>
+                <p class="mb-1 text-sm font-semibold">How comfortable are you with taking space when you need it?</p>
+                <textarea class="journal-input" rows="2" data-key="boundary_space"></textarea>
+            </div>
+        </div>
+        
+        <!-- Part 4: Processing Difficult Emotions -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Part 4: Processing Difficult Emotions</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            As you become more aware of your inner world, difficult emotions may surface. This is normal and actually a sign of healing.
+        </p>
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Working with Grief</h4>
+                <p class="mb-1 text-sm font-semibold">What sadness about past losses is emerging for you?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="grief_sadness"></textarea>
+                <p class="mb-1 text-sm font-semibold">What rituals can you create to honor what you didn't receive?</p>
+                <textarea class="journal-input" rows="2" data-key="grief_rituals"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Releasing Old Stories</h4>
+                <p class="mb-1 text-sm font-semibold">What outdated beliefs about yourself are you noticing?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="stories_outdated"></textarea>
+                <p class="mb-1 text-sm font-semibold">What new, kinder narrative can you experiment with?</p>
+                <textarea class="journal-input" rows="2" data-key="stories_kinder"></textarea>
+            </div>
+        </div>
+
+        <!-- Part 5: Building Secure Connections -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Part 5: Building Secure Connections</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            Healing happens in relationship—both with yourself and others. Consider these gentle explorations.
+        </p>
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Relationship Assessment</h4>
+                <p class="mb-1 text-sm font-semibold">Which relationships feel emotionally safe and nourishing?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="relationship_safe"></textarea>
+                <p class="mb-1 text-sm font-semibold">Which connections consistently drain your energy?</p>
+                <textarea class="journal-input" rows="2" data-key="relationship_draining"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Communication Experiments</h4>
+                <p class="mb-1 text-sm font-semibold">What can you practice to ask for what you need more directly?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="communication_direct"></textarea>
+                <p class="mb-1 text-sm font-semibold">What does it feel like to share feelings without taking responsibility for others' reactions?</p>
+                <textarea class="journal-input" rows="2" data-key="communication_feelings"></textarea>
+            </div>
+        </div>
+
+        <!-- Part 6: Integrating Your Growth -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Part 6: Integrating Your Growth</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            As you explore these practices, you're literally rewiring your nervous system for security and self-love. Consider these ways to support your ongoing growth.
+        </p>
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Creative Expression</h4>
+                <p class="mb-1 text-sm font-semibold">What forms of creative expression feel most authentic for you?</p>
+                <textarea class="journal-input mb-3" rows="2" data-key="creative_authentic"></textarea>
+                <p class="mb-1 text-sm font-semibold">How can you use these to connect with your authentic self?</p>
+                <textarea class="journal-input" rows="2" data-key="creative_connect"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Future Visioning</h4>
+                <p class="mb-1 text-sm font-semibold">What does it look like to fully trust yourself?</p>
+                <textarea class="journal-input" rows="2" data-key="future_trust"></textarea>
+            </div>
+        </div>
+        
+        <!-- Part 7: Recognizing Your Progress -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Part 7: Recognizing Your Progress</h2>
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            Healing isn't linear, and progress often shows up in subtle ways. Notice and celebrate these signs of growth.
+        </p>
+        <div class="space-y-6">
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Internal Shifts</h4>
+                <p class="mb-1 text-sm font-semibold">What internal shifts or changes have you noticed this week?</p>
+                <textarea class="journal-input" rows="2" data-key="progress_internal"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Relational Changes</h4>
+                <p class="mb-1 text-sm font-semibold">How have your relationships or communication patterns changed?</p>
+                <textarea class="journal-input" rows="2" data-key="progress_relational"></textarea>
+            </div>
+            <div class="journal-box">
+                <h4 class="text-lg font-bold text-gray-700 mb-2">Life Changes</h4>
+                <p class="mb-1 text-sm font-semibold">What changes have you noticed in your daily life?</p>
+                <textarea class="journal-input" rows="2" data-key="progress_life"></textarea>
+            </div>
+        </div>
+
+        <!-- Gentle Reminders for Your Journey -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Gentle Reminders for Your Journey</h2>
+        <div class="p-6 bg-[#f0e8e6] rounded-2xl border border-[#D1D5DB]">
+            <ul class="list-disc list-inside text-gray-700 space-y-2">
+                <li><strong class="font-medium text-gray-800">Healing is messy, non-linear, and uniquely yours</strong></li>
+                <li><strong class="font-medium text-gray-800">Self-compassion is more important than perfect self-care</strong></li>
+                <li><strong class="font-medium text-gray-800">Small steps taken consistently create profound change</strong></li>
+                <li><strong class="font-medium text-gray-800">You're Not Doing This Alone</strong> - I'm here to support you</li>
+                <li><strong class="font-medium text-gray-800">Trust the Process</strong> - you are exactly where you need to be</li>
+            </ul>
+        </div>
+        
+        <!-- Reflection Questions for Our Sessions -->
+        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-700 mt-12 mb-4 section-header">Reflection Questions for Our Sessions</h2>
+        <p class="text-gray-600 mb-4 leading-relaxed">
+            As you explore these practices, consider bringing any of these reflections to discuss:
+        </p>
+        <div class="space-y-4">
+            <p class="font-semibold">What patterns am I noticing in my emotional needs and responses?</p>
+            <textarea class="journal-input" rows="2" data-key="session_patterns"></textarea>
+            <p class="font-semibold">Which self-care practices feel most natural and helpful?</p>
+            <textarea class="journal-input" rows="2" data-key="session_helpful"></textarea>
+            <p class="font-semibold">What feels challenging or brings up resistance?</p>
+            <textarea class="journal-input" rows="2" data-key="session_challenging"></textarea>
+            <p class="font-semibold">How is my relationship with myself changing?</p>
+            <textarea class="journal-input" rows="2" data-key="session_relationship"></textarea>
+            <p class="font-semibold">What support do I need to continue this healing journey?</p>
+            <textarea class="journal-input" rows="2" data-key="session_support"></textarea>
+            <p class="font-semibold">What am I most grateful for in my growth so far?</p>
+            <textarea class="journal-input" rows="2" data-key="session_gratitude"></textarea>
+        </div>
+
+        <!-- Closing Remarks -->
+        <p class="text-gray-600 mt-8 italic text-center text-lg">
+            Remember: This exploration is an invitation, not an assignment. Take what resonates, leave what doesn't, and trust your own inner wisdom about what you need. You are the expert on your own experience, and I'm here to support you as you reclaim the nurturing, safety, and guidance you've always deserved.
+        </p>
+
+    </div>
+
+    <script>
+        // Auto-save functionality
+        let saveTimeout;
+        const saveIndicator = document.getElementById('saveIndicator');
+        const saveText = document.getElementById('saveText');
+
+        // Load saved data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+            // Check if Web Share API is available
+            if (navigator.share) {
+                document.getElementById('webShareButton').style.display = 'block';
+            }
+            
+            // Add escape key listener for modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeShareModal();
+                }
+            });
+        });
+
+        // Save data when inputs change
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('textarea[data-key], input[data-key]')) {
+                showSaveIndicator('saving');
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveData(e.target);
+                    showSaveIndicator('saved');
+                    setTimeout(() => hideSaveIndicator(), 2000);
+                }, 500);
+            }
+        });
+
+        // Save checkbox changes immediately
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('input[type="checkbox"][data-key]')) {
+                saveData(e.target);
+                showSaveIndicator('saved');
+                setTimeout(() => hideSaveIndicator(), 1000);
+            }
+        });
+
+        function saveData(element) {
+            const key = element.getAttribute('data-key');
+            if (element.type === 'checkbox') {
+                localStorage.setItem(key, element.checked);
+            } else {
+                localStorage.setItem(key, element.value);
+            }
+        }
+
+        function loadSavedData() {
+            // Load textareas
+            document.querySelectorAll('textarea[data-key]').forEach(textarea => {
+                const key = textarea.getAttribute('data-key');
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    textarea.value = saved;
+                }
+            });
+
+            // Load checkboxes
+            document.querySelectorAll('input[type="checkbox"][data-key]').forEach(checkbox => {
+                const key = checkbox.getAttribute('data-key');
+                const saved = localStorage.getItem(key);
+                if (saved === 'true') {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        function showSaveIndicator(status) {
+            saveIndicator.className = `save-indicator show ${status}`;
+            if (status === 'saving') {
+                saveText.textContent = 'Auto-saving...';
+            } else if (status === 'saved') {
+                saveText.textContent = '✓ Saved';
+            }
+        }
+
+        function hideSaveIndicator() {
+            saveIndicator.classList.remove('show');
+        }
+
+        // Share modal functions
+        function openShareModal() {
+            document.getElementById('shareModal').classList.add('show');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('shareModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeShareModal();
+            }
+        });
+
+        function getShareableText() {
+            return formatDataForSharing();
+        }
+
+        function collectAllData() {
+            const data = {};
+            
+            // Collect textarea data
+            document.querySelectorAll('textarea[data-key]').forEach(textarea => {
+                const key = textarea.getAttribute('data-key');
+                const value = textarea.value.trim();
+                if (value) {
+                    data[key] = value;
+                }
+            });
+            
+            // Collect checkbox data
+            document.querySelectorAll('input[type="checkbox"][data-key]').forEach(checkbox => {
+                const key = checkbox.getAttribute('data-key');
+                if (checkbox.checked) {
+                    // Get the label text for better readability
+                    const label = checkbox.parentNode.textContent.trim();
+                    data[key] = label;
+                }
+            });
+            
+            return data;
+        }
+
+        function formatDataForSharing() {
+            const data = collectAllData();
+            const date = new Date().toLocaleDateString();
+            
+            // Create formatted text with professional header
+            let shareText = `SELF-CARE JOURNEY RESPONSES\n`;
+            shareText += `Date: ${date}\n`;
+            shareText += `Therapist: Janice LaFountaine, MS, LMFT\n`;
+            shareText += `${'='.repeat(50)}\n\n`;
+
+            // Define sections with their corresponding keys and readable names
+            const sections = [
+                {
+                    title: '🔍 GENTLE SELF-OBSERVATION',
+                    keys: {
+                        'body_awareness': 'What is happening in my body right now?',
+                        'thoughts_awareness': 'What thoughts are running through my mind?',
+                        'emotions_awareness': 'What emotions am I experiencing?',
+                        'trigger_awareness': 'What was happening just before this feeling arose?'
+                    }
+                },
+                {
+                    title: '🌱 SELF-CARE TOOLKIT',
+                    keys: {
+                        'nurture_touch': 'Nurturing Touch',
+                        'nurture_warmth': 'Warmth & Comfort',
+                        'nurture_comfort': 'Creating Comfort',
+                        'nurture_nourishment': 'Nourishment',
+                        'nurture_other': 'Other Nurturing Activities',
+                        'safety_grounding': 'Grounding Practices',
+                        'safety_breathing': 'Breathing Techniques',
+                        'safety_environment': 'Environmental Safety',
+                        'safety_selftalk': 'Supportive Self-Talk',
+                        'safety_other': 'Other Safety Practices',
+                        'guidance_stillness': 'Stillness & Meditation',
+                        'guidance_writing': 'Writing & Journaling',
+                        'guidance_reflection': 'Self-Reflection',
+                        'guidance_values': 'Values Connection',
+                        'guidance_other': 'Other Inner Guidance Practices'
+                    }
+                },
+                {
+                    title: '🔄 EXPLORING PATTERNS',
+                    keys: {
+                        'surrogate_emotion': 'Emotions before coping behaviors',
+                        'surrogate_experiment': 'Experience meeting needs directly',
+                        'nervous_calm': 'What helps me feel calm',
+                        'nervous_safe': 'When I feel most safe',
+                        'boundary_yes': 'When I say yes but want to say no',
+                        'boundary_space': 'Comfort with taking space'
+                    }
+                },
+                {
+                    title: '💝 PROCESSING DIFFICULT EMOTIONS',
+                    keys: {
+                        'grief_sadness': 'Emerging sadness about losses',
+                        'grief_rituals': 'Rituals to honor what I didn\'t receive',
+                        'stories_outdated': 'Outdated beliefs about myself',
+                        'stories_kinder': 'New, kinder narrative'
+                    }
+                },
+                {
+                    title: '🤝 BUILDING SECURE CONNECTIONS',
+                    keys: {
+                        'relationship_safe': 'Emotionally safe relationships',
+                        'relationship_draining': 'Energy-draining connections',
+                        'communication_direct': 'Asking for what I need',
+                        'communication_feelings': 'Sharing feelings without taking responsibility for others'
+                    }
+                },
+                {
+                    title: '🎨 INTEGRATING GROWTH',
+                    keys: {
+                        'creative_authentic': 'Authentic creative expression',
+                        'creative_connect': 'Using creativity to connect with authentic self',
+                        'future_trust': 'What it looks like to fully trust myself'
+                    }
+                },
+                {
+                    title: '📈 RECOGNIZING PROGRESS',
+                    keys: {
+                        'progress_internal': 'Internal shifts this week',
+                        'progress_relational': 'Changes in relationships/communication',
+                        'progress_life': 'Changes in daily life'
+                    }
+                },
+                {
+                    title: '💭 SESSION REFLECTIONS',
+                    keys: {
+                        'session_patterns': 'Patterns in emotional needs and responses',
+                        'session_helpful': 'Most natural and helpful self-care practices',
+                        'session_challenging': 'What brings up resistance',
+                        'session_relationship': 'How my relationship with myself is changing',
+                        'session_support': 'Support needed to continue healing',
+                        'session_gratitude': 'What I\'m grateful for in my growth'
+                    }
+                }
+            ];
+
+            // Build formatted content
+            sections.forEach(section => {
+                let hasContent = false;
+                let sectionText = `${section.title}\n${'-'.repeat(section.title.length)}\n\n`;
+                
+                Object.entries(section.keys).forEach(([key, label]) => {
+                    if (data[key]) {
+                        hasContent = true;
+                        sectionText += `• ${label}:\n  ${data[key]}\n\n`;
+                    }
+                });
+                
+                if (hasContent) {
+                    shareText += sectionText + '\n';
+                }
+            });
+
+            // Add footer
+            shareText += `\n${'='.repeat(50)}\n`;
+            shareText += `Generated from: An Invitation to Nurturing & Self-Love\n`;
+            shareText += `Therapist: Janice LaFountaine, MS, LMFT\n`;
+            shareText += `Date: ${date}`;
+
+            return shareText;
+        }
+
+        function shareViaEmail() {
+            try {
+                const shareText = getShareableText();
+                const subject = encodeURIComponent('My Self-Care Journey Responses');
+                const body = encodeURIComponent(shareText);
+                const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+                
+                window.location.href = mailtoLink;
+                closeShareModal();
+                
+                showSaveIndicator('success');
+                saveText.textContent = '✓ Email opened';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            } catch (error) {
+                console.error('Error sharing via email:', error);
+                showSaveIndicator('error');
+                saveText.textContent = '✗ Email failed';
+                setTimeout(() => hideSaveIndicator(), 3000);
+            }
+        }
+
+        async function copyToClipboard() {
+            try {
+                const shareText = getShareableText();
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(shareText);
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareText;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+                
+                closeShareModal();
+                showSaveIndicator('success');
+                saveText.textContent = '✓ Copied to clipboard';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            } catch (error) {
+                console.error('Error copying to clipboard:', error);
+                closeShareModal();
+                showSaveIndicator('error');
+                saveText.textContent = '✗ Copy failed';
+                setTimeout(() => hideSaveIndicator(), 3000);
+            }
+        }
+
+        async function shareViaWebAPI() {
+            if (!navigator.share) {
+                showSaveIndicator('error');
+                saveText.textContent = '✗ Sharing not supported';
+                setTimeout(() => hideSaveIndicator(), 3000);
+                return;
+            }
+
+            try {
+                const shareText = getShareableText();
+                
+                await navigator.share({
+                    title: 'My Self-Care Journey Responses',
+                    text: shareText
+                });
+                
+                closeShareModal();
+                showSaveIndicator('success');
+                saveText.textContent = '✓ Shared successfully';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    showSaveIndicator('error');
+                    saveText.textContent = '✗ Sharing failed';
+                    setTimeout(() => hideSaveIndicator(), 3000);
+                }
+                closeShareModal();
+            }
+        }
+
+        function downloadFile() {
+            try {
+                const shareText = getShareableText();
+                const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+                
+                const blob = new Blob([shareText], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `self-care-journey-${date}.txt`;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                closeShareModal();
+                showSaveIndicator('success');
+                saveText.textContent = '✓ Downloaded successfully';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            } catch (error) {
+                console.error('Error downloading file:', error);
+                closeShareModal();
+                showSaveIndicator('error');
+                saveText.textContent = '✗ Download failed';
+                setTimeout(() => hideSaveIndicator(), 3000);
+            }
+        }
+
+        function exportData() {
+            try {
+                const shareText = getShareableText();
+                const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+                
+                const blob = new Blob([shareText], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `self-care-journey-export-${date}.txt`;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showSaveIndicator('success');
+                saveText.textContent = '✓ Exported successfully';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showSaveIndicator('error');
+                saveText.textContent = '✗ Export failed';
+                setTimeout(() => hideSaveIndicator(), 3000);
+            }
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all your responses? This cannot be undone.')) {
+                // Clear localStorage
+                document.querySelectorAll('[data-key]').forEach(element => {
+                    const key = element.getAttribute('data-key');
+                    localStorage.removeItem(key);
+                    
+                    // Clear the form elements
+                    if (element.type === 'checkbox') {
+                        element.checked = false;
+                    } else {
+                        element.value = '';
+                    }
+                });
+                
+                showSaveIndicator('success');
+                saveText.textContent = '✓ Cleared successfully';
+                setTimeout(() => hideSaveIndicator(), 2000);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -361,31 +361,31 @@
             <p class="text-gray-600 mb-4">Choose how you'd like to share your self-care journey responses:</p>
             
             <div class="space-y-3">
-                <button onclick="shareViaEmail()" class="share-option" style="background-color: #EFF6FF; color: #1D4ED8;">
+                <button onclick="shareViaEmail()" class="share-option">
                     <span class="icon">📧</span>
                     <div class="content">
                         <div class="title">Email</div>
                         <div class="description">Send via your email client</div>
                     </div>
                 </button>
-                
-                <button onclick="copyToClipboard()" class="share-option" style="background-color: #F0FDF4; color: #15803D;">
+
+                <button onclick="copyToClipboard()" class="share-option">
                     <span class="icon">📋</span>
                     <div class="content">
                         <div class="title">Copy to Clipboard</div>
                         <div class="description">Copy text to paste anywhere</div>
                     </div>
                 </button>
-                
-                <button onclick="shareViaWebAPI()" class="share-option" id="webShareButton" style="background-color: #FAF5FF; color: #7C3AED; display: none;">
+
+                <button onclick="shareViaWebAPI()" class="share-option" id="webShareButton" style="display: none;">
                     <span class="icon">🔗</span>
                     <div class="content">
                         <div class="title">Share</div>
                         <div class="description">Use device sharing options</div>
                     </div>
                 </button>
-                
-                <button onclick="downloadFile()" class="share-option" style="background-color: #FFF7ED; color: #C2410C;">
+
+                <button onclick="downloadFile()" class="share-option">
                     <span class="icon">💾</span>
                     <div class="content">
                         <div class="title">Download File</div>
@@ -407,16 +407,16 @@
 
         <!-- Save/Export Controls -->
         <div class="no-print mb-6 flex flex-wrap gap-3 justify-end">
-            <button onclick="openShareModal()" class="px-4 py-2 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 transition-colors text-sm font-medium">
+            <button onclick="openShareModal()" class="btn btn-primary">
                 🔗 Share
             </button>
-            <button onclick="exportData()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+            <button onclick="exportData()" class="btn btn-ghost">
                 📥 Export My Responses
             </button>
-            <button onclick="clearData()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium">
+            <button onclick="clearData()" class="btn btn-danger">
                 🗑️ Clear All Data
             </button>
-            <button onclick="window.print()" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+            <button onclick="window.print()" class="btn btn-ghost">
                 🖨️ Print
             </button>
         </div>
@@ -652,6 +652,27 @@
         <p class="text-gray-600 mt-8 italic text-center text-lg">
             Remember: This exploration is an invitation, not an assignment. Take what resonates, leave what doesn't, and trust your own inner wisdom about what you need. You are the expert on your own experience, and I'm here to support you as you reclaim the nurturing, safety, and guidance you've always deserved.
         </p>
+
+        <!-- Companion Resources -->
+        <section class="mb-8">
+            <h2 class="section-header text-2xl sm:text-3xl font-semibold mt-12">Companion Resources</h2>
+            <p class="mb-4 leading-relaxed">These are some of the voices that have been companions to this work. None of them is homework. Take what serves. Leave what doesn't.</p>
+
+            <h3 class="text-xl font-semibold mt-6 mb-2">Books</h3>
+            <ul style="padding-left: 1.25rem; line-height: 1.8;">
+                <li><span style="font-style: italic;">Self-Compassion: The Proven Power of Being Kind to Yourself</span> by Kristin Neff — the foundational text for the work this handout invites. Her research gives language, and permission, to the softer voice inside.</li>
+                <li><span style="font-style: italic;">Radical Compassion: Learning to Love Yourself and Your World with the Practice of RAIN</span> by Tara Brach — her RAIN practice (recognize, allow, investigate, nurture) is a gentle companion to the inner-nurturing work.</li>
+                <li><span style="font-style: italic;">Complex PTSD: From Surviving to Thriving</span> by Pete Walker — the inner-critic chapters in particular. He has spent decades on the voice that attacks and how it softens.</li>
+                <li><span style="font-style: italic;">Resilient: How to Grow an Unshakable Core of Calm, Strength, and Happiness</span> by Rick Hanson — grounded in how the brain learns. Brief daily practices for building the nurturer's voice alongside the critic's.</li>
+            </ul>
+
+            <h3 class="text-xl font-semibold mt-6 mb-2">Online practices</h3>
+            <ul style="padding-left: 1.25rem; line-height: 1.8;">
+                <li><a href="https://self-compassion.org">Self-Compassion</a> — free guided meditations and the Self-Compassion Break.</li>
+                <li><a href="https://www.tarabrach.com">Tara Brach</a> — free weekly talks and guided meditations, including RAIN.</li>
+                <li><a href="https://pete-walker.com">Pete Walker</a> — free self-help articles, including <span style="font-style: italic;">Shrinking the Inner Critic</span>.</li>
+            </ul>
+        </section>
 
     </div>
 
